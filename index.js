@@ -4,28 +4,32 @@ app.controller('appController', ($scope, $http) => {
     const wellIndex = 10; // known row number for batch header
 
     $scope.export = () => {
-        var analysisDate = $scope.headerData.TimeofAnalysis.split(' ')[0].replace('\"','').replace('\\','');
+        var analysisDate = $scope.headerData.TimeofAnalysis.split(' ')[0].replace('\"', '').replace('\\', '');
 
-        var csvRows = [];
-
-        $scope.batchData.forEach((row, i) => {
-            var csv = (row.SampleID || '') + ',' + analysisDate + ',' + (row.Result || '') + ',';
-
-            csvRows.push(csv);
+        var batches = groupBy($scope.batchData, 'Description').map((group, i) => {
+            return { id: group[0].Description, data: group };
         });
 
-        var exportPayload = csvRows.join('\r\n');
+        // console.log(batches);
 
-        // console.log(exportPayload);
+        batches.forEach((batch, i) => {
+            var csvRows = [];
 
-        // TODO: get this value dynamically
-        var csvId = 12345;
+            batch.data.forEach((row, j) => {
+                var csv = (row.SampleID || '') + ',' + analysisDate + ',' + (row.Result || '') + ',';
 
-        return $http.post('/export', JSON.stringify({id: csvId, data: exportPayload}));
+                csvRows.push(csv);
+            });
+
+            var exportPayload = csvRows.join('\r\n');
+
+            return $http.post('/export', JSON.stringify({ id: batch.id, data: exportPayload }));
+        });
     };
 
     $scope.saveInputFile = (data) => {
-        return $http.post('/import', JSON.stringify(data));
+        console.log('no need to save this file');
+        // return $http.post('/import', JSON.stringify(data));
     }
 
     $scope.fileIntake = () => {
@@ -34,7 +38,7 @@ app.controller('appController', ($scope, $http) => {
         fileInput.onchange = uploadHandler;
         fileInput.click();
     };
-    
+
     var uploadHandler = (e) => {
         $scope.$apply(() => {
             var intakeFile = e.target.files[0];
@@ -91,7 +95,15 @@ app.controller('appController', ($scope, $http) => {
                 obj[batchProps[j]] = cell;
             });
 
+            // ignore results with these conditions
+            if (!obj.SampleID || !obj.Description || obj.Description.toLowerCase().indexOf('batches') > -1) return null;
+
+            // hardcode this value for positive results
+            if (obj.Result.toLowerCase() == 'positive') obj.Result = 'Presumptive Positive';
+
             return obj;
+        }).filter((row) => {
+            return row != null;
         });
 
         // console.log($scope.batchData);
@@ -108,10 +120,26 @@ app.controller('appController', ($scope, $http) => {
                 console.log(err);
             });
     };
+
+    var groupBy = (collection, property) => {
+        var i = 0, val, index,
+            values = [], result = [];
+        for (; i < collection.length; i++) {
+            val = collection[i][property];
+            index = values.indexOf(val);
+            if (index > -1)
+                result[index].push(collection[i]);
+            else {
+                values.push(val);
+                result.push([collection[i]]);
+            }
+        }
+        return result;
+    };
 });
 
 app.filter('filterAnalysis', () => {
     return (input) => {
-        return input.replace('\"','').replace('\\','');
+        return input.replace('\"', '').replace('\\', '');
     };
 })
