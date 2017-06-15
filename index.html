@@ -1,0 +1,70 @@
+<!doctype html>
+
+<head>
+    <link rel="stylesheet" href="public/bower_components/bootstrap/dist/css/bootstrap.css" />
+    <style>
+        [ng\:cloak],
+        [ng-cloak],
+        [data-ng-cloak],
+        [x-ng-cloak],
+        .ng-cloak,
+        .x-ng-cloak {
+            display: none !important;
+        }
+    </style>
+</head>
+
+<body ng-app="app" ng-cloak>
+    <div class="container" ng-controller="appController">
+        <div class="row">
+            <br/>
+            <div class="col-sm-12">
+                <button type="button" class="btn btn-primary" ng-click="fileIntake()">Upload TXT file</button>
+                <button type="button" class="btn btn-primary" ng-click="export()">Export CSV file</button>
+                <button type="button" class="btn btn-default pull-right" ng-click="import();">Import Example</button>
+            </div>
+            <br/><br/>
+            <div class="col-sm-3" ng-if="headerData">
+                <p><strong>Rack Name:</strong> {{headerData.RackName}}</p>
+                <p><strong>Accession:</strong> {{headerData.Accession}}</p>
+                <p><strong>Rack Status:</strong> {{headerData.RackStatus}}</p>
+                <p><strong>Rack Description:</strong> {{headerData.RackDescription}}</p>
+                <p><strong>Operator:</strong> {{headerData.Operator}}</p>
+                <p><strong>Original Data File:</strong> {{headerData.OriginalDataFile}}</p>
+                <p><strong>Time of Verification:</strong> {{headerData.TimeofVerification}}</p>
+                <p><strong>Time of PCR Run:</strong> {{headerData.TimeofPCRRun}}</p>
+                <p><strong>Time of Detection:</strong> {{headerData.TimeofDetection}}</p>
+                <p><strong>Time of Analysis:</strong> {{headerData.TimeofAnalysis | filterAnalysis}}</p>
+            </div>
+            <div class="col-sm-9" ng-if="batchData">
+                <table class="table table-condensed table-bordered">
+                    <thead>
+                        <th>Well</th>
+                        <th>Sample ID</th>
+                        <th>Result</th>
+                        <th>Target</th>
+                        <th>Control</th>
+                        <th>Description</th>
+                        <th>Lot Number</th>
+                        <th>Control Status</th>
+                    </thead>
+                    <tbody>
+                        <tr ng-repeat="row in batchData track by $index">
+                            <td>{{row.Well}}</td>
+                            <td>{{row.SampleID}}</td>
+                            <td>{{row.Result}}</td>
+                            <td>{{row.Target}}</td>
+                            <td>{{row.Control}}</td>
+                            <td>{{row.Description}}</td>
+                            <td>{{row.LotNumber}}</td>
+                            <td>{{row.ControlStatus}}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script src="public/bower_components/angular/angular.js"></script>
+    <script src="public/index.js"></script>
+</body>
