@@ -14,9 +14,14 @@ app.controller('appController', ($scope, $http) => {
             csvRows.push(csv);
         });
 
-        console.log(csvRows.join('\r\n'));
+        var exportPayload = csvRows.join('\r\n');
 
-        // return $http.post('/export', JSON.stringify(data));
+        // console.log(exportPayload);
+
+        // TODO: get this value dynamically
+        var csvId = 12345;
+
+        return $http.post('/export', JSON.stringify({id: csvId, data: exportPayload}));
     };
 
     $scope.saveInputFile = (data) => {

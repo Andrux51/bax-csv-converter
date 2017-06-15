@@ -59,11 +59,14 @@ server.register(require('inert'), (err) => {
         method: 'POST',
         path: '/export',
         handler: (req, res) => {
+            var createdFileName = 'schedule' + req.payload.id + '_results.csv';
+
             fs.stat('output', (err, stats) => {
                 if(err) fs.mkdirSync('output');
 
-                // do stuff with req.payload
-                res('Saved').code(201);
+                fs.writeFile('./output/' + createdFileName, req.payload.data, 'utf8', () => {
+                    res('Saved to file ' + createdFileName).code(201);
+                });
             });
         }
     })
